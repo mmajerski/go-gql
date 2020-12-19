@@ -6,42 +6,42 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/userq11/meetmeup/graph/generated"
 	"github.com/userq11/meetmeup/graph/model"
 )
 
-func (r *meetupResolver) User(ctx context.Context, obj *model.Meetup) (*model.User, error) {
-	user := new(model.User)
-
-	for _, u := range users {
-		if u.ID == obj.User {
-			user = u
-			break
-		}
-	}
-
-	if user == nil {
-		return nil, errors.New("User with the id does not exist")
-	}
-
-	return user, nil
+func (r *meetupResolver) UserID(ctx context.Context, obj *model.Meetup) (*model.User, error) {
+	return r.UsersRepo.GetUserByID(obj.UserID)
 }
 
 func (r *mutationResolver) CreateMeetup(ctx context.Context, input *model.NewMeetup) (*model.Meetup, error) {
-	panic(fmt.Errorf("not implemented"))
+	if len(input.Name) < 3 {
+		return nil, errors.New("Name is not long enough")
+	}
+
+	if len(input.Description) < 3 {
+		return nil, errors.New("Description is not long enough")
+	}
+
+	meetup := &model.Meetup{
+		Name:        input.Name,
+		Description: input.Description,
+		UserID:      "1",
+	}
+
+	return r.MeetupsRepo.CreateMeetup(meetup)
 }
 
 func (r *queryResolver) Meetups(ctx context.Context) ([]*model.Meetup, error) {
-	return meetups, nil
+	return r.MeetupsRepo.GetMeetups()
 }
 
 func (r *userResolver) Meetups(ctx context.Context, obj *model.User) ([]*model.Meetup, error) {
 	var m []*model.Meetup
 
 	for _, meetup := range meetups {
-		if meetup.User == obj.ID {
+		if meetup.UserID == obj.ID {
 			m = append(m, meetup)
 		}
 	}
@@ -72,18 +72,19 @@ type userResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+
 var meetups = []*model.Meetup{
 	{
 		ID:          "1",
 		Name:        "A meetup",
 		Description: "A description",
-		User:        "1",
+		UserID:      "1",
 	},
 	{
 		ID:          "2",
 		Name:        "A meetup 2",
 		Description: "A description 2",
-		User:        "2",
+		UserID:      "2",
 	},
 }
 var users = []*model.User{

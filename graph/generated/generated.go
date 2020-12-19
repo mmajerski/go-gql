@@ -49,7 +49,7 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
-		User        func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -69,7 +69,7 @@ type ComplexityRoot struct {
 }
 
 type MeetupResolver interface {
-	User(ctx context.Context, obj *model.Meetup) (*model.User, error)
+	UserID(ctx context.Context, obj *model.Meetup) (*model.User, error)
 }
 type MutationResolver interface {
 	CreateMeetup(ctx context.Context, input *model.NewMeetup) (*model.Meetup, error)
@@ -117,12 +117,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Meetup.Name(childComplexity), true
 
-	case "Meetup.user":
-		if e.complexity.Meetup.User == nil {
+	case "Meetup.user_id":
+		if e.complexity.Meetup.UserID == nil {
 			break
 		}
 
-		return e.complexity.Meetup.User(childComplexity), true
+		return e.complexity.Meetup.UserID(childComplexity), true
 
 	case "Mutation.createMeetup":
 		if e.complexity.Mutation.CreateMeetup == nil {
@@ -247,7 +247,7 @@ type Meetup {
   id: ID!
   name: String!
   description: String!
-  user: User!
+  user_id: User!
 }
 
 input NewMeetup {
@@ -443,7 +443,7 @@ func (ec *executionContext) _Meetup_description(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Meetup_user(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
+func (ec *executionContext) _Meetup_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Meetup) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -461,7 +461,7 @@ func (ec *executionContext) _Meetup_user(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Meetup().User(rctx, obj)
+		return ec.resolvers.Meetup().UserID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1915,7 +1915,7 @@ func (ec *executionContext) _Meetup(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "user":
+		case "user_id":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1923,7 +1923,7 @@ func (ec *executionContext) _Meetup(ctx context.Context, sel ast.SelectionSet, o
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Meetup_user(ctx, field, obj)
+				res = ec._Meetup_user_id(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
