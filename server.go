@@ -66,9 +66,9 @@ func main() {
 
 	queryHandler := handler.NewDefaultServer(generated.NewExecutableSchema(c))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", graph.DataloaderMiddleware(DB, queryHandler))
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", graph.DataloaderMiddleware(DB, queryHandler))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

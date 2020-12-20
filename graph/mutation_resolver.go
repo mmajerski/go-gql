@@ -8,6 +8,7 @@ import (
 
 	"github.com/userq11/meetmeup/graph/generated"
 	"github.com/userq11/meetmeup/graph/model"
+	"github.com/userq11/meetmeup/middleware"
 )
 
 type mutationResolver struct{ *Resolver }
@@ -16,6 +17,11 @@ type mutationResolver struct{ *Resolver }
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 func (r *mutationResolver) CreateMeetup(ctx context.Context, input *model.NewMeetup) (*model.Meetup, error) {
+	currentUser, err := middleware.GetCurrentUserFromCtx(ctx)
+	if err != nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
 	if len(input.Name) < 3 {
 		return nil, errors.New("Name is not long enough")
 	}
@@ -27,7 +33,7 @@ func (r *mutationResolver) CreateMeetup(ctx context.Context, input *model.NewMee
 	meetup := &model.Meetup{
 		Name:        input.Name,
 		Description: input.Description,
-		UserID:      "1",
+		UserID:      currentUser.ID,
 	}
 
 	return r.MeetupsRepo.CreateMeetup(meetup)
@@ -132,6 +138,28 @@ func (m *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 	token, err := user.GenToken()
 	if err != nil {
 		log.Printf("Error while generating the token: %v", err)
+		return nil, errors.New("Something went wrong")
+	}
+
+	return &model.AuthResponse{
+		AuthToken: token,
+		User:      user,
+	}, nil
+}
+
+func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthResponse, error) {
+	user, err := r.UsersRepo.GetUserByEmail(input.Email)
+	if err != nil {
+		return nil, errors.New("Incorrect either email or password")
+	}
+
+	err = user.ComparePassword(input.Password)
+	if err != nil {
+		return nil, errors.New("Incorrect either email or password")
+	}
+
+	token, err := user.GenToken()
+	if err != nil {
 		return nil, errors.New("Something went wrong")
 	}
 
