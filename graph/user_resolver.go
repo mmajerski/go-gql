@@ -13,13 +13,5 @@ type userResolver struct{ *Resolver }
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 func (r *userResolver) Meetups(ctx context.Context, obj *model.User) ([]*model.Meetup, error) {
-	var m []*model.Meetup
-
-	for _, meetup := range meetups {
-		if meetup.UserID == obj.ID {
-			m = append(m, meetup)
-		}
-	}
-
-	return m, nil
+	return r.MeetupsRepo.GetMeetupsForUser(obj)
 }
