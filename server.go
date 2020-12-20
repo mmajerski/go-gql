@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/userq11/meetmeup/graph"
+	"github.com/userq11/meetmeup/graph/domain"
 	"github.com/userq11/meetmeup/graph/generated"
 	customMiddleware "github.com/userq11/meetmeup/middleware"
 	"github.com/userq11/meetmeup/postgres"
@@ -62,7 +63,9 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(customMiddleware.AuthMiddleware(userRepo))
 
-	c := generated.Config{Resolvers: &graph.Resolver{MeetupsRepo: postgres.MeetupsRepo{DB: DB}, UsersRepo: userRepo}}
+	d := domain.NewDomain(userRepo, postgres.MeetupsRepo{DB: DB})
+
+	c := generated.Config{Resolvers: &graph.Resolver{Domain: d}}
 
 	queryHandler := handler.NewDefaultServer(generated.NewExecutableSchema(c))
 

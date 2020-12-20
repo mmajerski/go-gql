@@ -2,7 +2,9 @@
 
 package graph
 
-import "github.com/userq11/meetmeup/postgres"
+import (
+	"github.com/userq11/meetmeup/graph/domain"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -10,6 +12,5 @@ import "github.com/userq11/meetmeup/postgres"
 
 // Resolver type
 type Resolver struct {
-	MeetupsRepo postgres.MeetupsRepo
-	UsersRepo   postgres.UsersRepo
+	Domain *domain.Domain
 }

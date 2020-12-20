@@ -13,5 +13,5 @@ type userResolver struct{ *Resolver }
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 func (r *userResolver) Meetups(ctx context.Context, obj *model.User) ([]*model.Meetup, error) {
-	return r.MeetupsRepo.GetMeetupsForUser(obj)
+	return r.Domain.MeetupsRepo.GetMeetupsForUser(obj)
 }
